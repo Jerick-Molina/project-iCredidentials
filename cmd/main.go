@@ -21,7 +21,7 @@ func main() {
 	params := imongo.Config{
 		Username: "",
 		Password: "",
-		//Host:     "192.168.3.139",
+		//Host:     "",
 		Host:     "",
 		Database: "",
 	}
