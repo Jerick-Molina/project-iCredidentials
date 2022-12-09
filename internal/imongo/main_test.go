@@ -1,31 +1,25 @@
-package main
+package imongo
 
 import (
 	"context"
-	"fmt"
-	"projects/iCredidentials/internal/imongo"
+	"os"
+	"testing"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-// type Settings struct {
-// 	//Server
-// 	imongo      *imongo.Archive
-// 	Error       string
-// 	RedirectURI string
-// }
+var testCollections *Collections
 
-func main() {
-	params := imongo.Config{
+func TestMain(m *testing.M) {
+	params := Config{
 		Username: "JAdmin",
 		Password: "Nixon9090%21",
 		//Host:     "192.168.3.139",
 		Host:     "cluster0.d6crvkb.mongodb.net/test",
-		Database: "Account",
+		Database: "iCredidentials",
 	}
-
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(params.UriConfig()))
 
 	if err != nil {
@@ -40,13 +34,7 @@ func main() {
 		panic(err)
 	}
 
-	t := imongo.NewArchive(client, client.Database(params.Database))
+	testCollections = New(client.Database(params.Database))
 
-	err = t.StupidTestTx(context.TODO())
-	//err = t.TestNoTX(context.TODO())
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Successfully connected and pinged.")
+	os.Exit(m.Run())
 }
