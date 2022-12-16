@@ -7,7 +7,7 @@ import (
 )
 
 const chars = "abcdefghijklmnopqrstuvwxyz123456789"
-const alphabet = "abcdefghijklmnopqrstuvwxyz"
+const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOQRZTUVWXYZ"
 
 var names = []string{"John", "Paul", "Marcus", "Vanessa", "Paulina", "Xavier", "Richard", "Irene"}
 var roles = []string{"Admin", "Associate", "Member"}
@@ -69,4 +69,14 @@ func RandomSeverityLevel() string {
 	rSLevel := len(severityLevel)
 
 	return severityLevel[rand.Intn(rSLevel)]
+}
+
+func RandomBool() bool {
+
+	rand := rand.Intn(2)
+
+	if rand == 1 {
+		return false
+	}
+	return true
 }

@@ -10,6 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var letters_test = "ABCDEFGHIJKLMNOQRZTUVWXYZ"
+var numbers_test = "1234567890"
+var special_test = "!?$&%#^"
+
 //	"projects/iCredidentials/util"
 
 func createRandomAccount(t *testing.T) AccountCreateAccountParams {
@@ -21,8 +25,12 @@ func createRandomAccount(t *testing.T) AccountCreateAccountParams {
 	}
 	fullName := fmt.Sprintf("%s%s", arg.FirstName, arg.LastName)
 	arg.Email = fmt.Sprintf("%s%d@testSubject.com", fullName, util.RandomNumber(200))
-	err := testCollections.CreateAccount(context.Background(), arg)
+	token, err := testCollections.CreateAccount(context.Background(), arg)
+
 	require.NoError(t, err)
+
+	require.NotEmpty(t, token)
+
 	return arg
 }
 

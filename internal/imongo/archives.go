@@ -4,10 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"projects/iCredidentials/internal/security"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+//TODO 12/17/2022
+// Mock unit test
 
 type Config struct {
 	Username   string
@@ -21,6 +25,7 @@ type Archive struct {
 	client *mongo.Client
 	db     *mongo.Database
 	*Collections
+	*Settings
 }
 
 // Creates a uri string format that is required to connect to  MongoDB.
@@ -99,16 +104,104 @@ func (arch *Archive) StupidTestTx(ctx context.Context) error {
 	return nil
 }
 
-func (arch *Archive) TestNoTX(ctx context.Context) error {
+//Note:
+//Every account that will want to create its own settings will stick with the default settings.
+func (arch *Archive) AccountCreationDefaultTx(ctx context.Context, acc AccountCreateAccountParams) (string, error) {
+	var token string
+	err := arch.execTx(ctx, func(sCtx mongo.SessionContext) (interface{}, error) {
+		//STEPS:
+		// Get default settings code
+		// See if settings match
+		// Create account under settings rules
 
-	filters := bson.D{{"Email", "emai@gmail.com"}}
-	var r bson.D
-	err := arch.client.Database("TestDB").Collection("Users").FindOne(ctx, filters).Decode(&r)
-	fmt.Println(r)
+		settings, err := arch.GetSettingsDefault(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		err = SettingsAccountCreateValidation(acc, settings)
+		if err != nil {
+			return nil, err
+		}
+
+		user_id, err := arch.CreateAccount(ctx, acc)
+
+		token, err = security.CreateAccessToken(user_id, "isOwnerUnique", "default")
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
 
 	if err != nil {
-		return err
+		return "", nil
 	}
 
-	return nil
+	return token, err
+}
+
+//Will use someone else settings will only return succes in sign in | sign out . This isnt really useful only to show its available options.
+func (arch *Archive) AccountUniqueDefaultTx(ctx context.Context, acc AccountCreateAccountParams) (interface{}, error) {
+	var token string
+	err := arch.execTx(ctx, func(sCtx mongo.SessionContext) (interface{}, error) {
+
+		settings, err := arch.GetSettingsUnique(ctx, acc.SettingId)
+		if err != nil {
+			return nil, err
+		}
+
+		err = SettingsAccountCreateValidation(acc, settings)
+		if err != nil {
+			return nil, err
+		}
+
+		user_id, err := arch.CreateAccount(ctx, acc)
+
+		token, err = security.CreateAccessToken(user_id, "null", "unique")
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+
+	if err != nil {
+		return "", nil
+	}
+
+	return token, err
+}
+
+//Will use someone else settings & it comes from a Authorized 3rd party.
+func (arch *Archive) AccountThirdPartyCreationTx(ctx context.Context, acc AccountCreateAccountParams) (string, error) {
+	var token string
+	err := arch.execTx(ctx, func(sCtx mongo.SessionContext) (interface{}, error) {
+		//STEPS:
+		// Get default settings code
+		// See if settings match
+		// Create account under settings rules
+
+		settings, err := arch.GetSettingsDefault(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		err = SettingsAccountCreateValidation(acc, settings)
+		if err != nil {
+			return nil, err
+		}
+
+		user_id, err := arch.CreateAccount(ctx, acc)
+
+		token, err = security.CreateAccessToken(user_id, "isOwnerUnique", "default")
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+
+	if err != nil {
+		return "", nil
+	}
+
+	return token, err
 }
