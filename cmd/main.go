@@ -19,11 +19,11 @@ import (
 
 func main() {
 	params := imongo.Config{
-		Username: "",
-		Password: "",
-		//Host:     "",
-		Host:     "",
-		Database: "",
+		Username: "JAdmin",
+		Password: "Nixon9090%21",
+		//Host:     "192.168.3.139",
+		Host:     "cluster0.d6crvkb.mongodb.net/test",
+		Database: "Account",
 	}
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(params.UriConfig()))
