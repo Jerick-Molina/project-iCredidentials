@@ -3,31 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
-	"projects/iCredidentials/internal/imongo"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"projects/iCredidentials/cmd/server.go"
+	"projects/iCredidentials/internal/database"
 )
 
-// type Settings struct {
-// 	//Server
-// 	imongo      *imongo.Archive
-// 	Error       string
-// 	RedirectURI string
-// }
-
 func main() {
-	params := imongo.Config{
+
+	params := database.Config{
 		Username: "JAdmin",
 		Password: "Nixon9090%21",
-		//Host:     "192.168.3.139",
 		Host:     "cluster0.d6crvkb.mongodb.net/test",
 		Database: "Account",
 	}
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(params.UriConfig()))
-
+	client, err := database.RunDatabase(params)
 	if err != nil {
 		panic(err)
 	}
@@ -36,17 +25,10 @@ func main() {
 			panic(err)
 		}
 	}()
-	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
-		panic(err)
-	}
+	fmt.Println("Connected to Databse")
 
-	t := imongo.NewArchive(client, client.Database(params.Database))
+	archive := database.NewArchive(client, params.Database)
+	server := server.NewServer(archive)
 
-	err = t.StupidTestTx(context.TODO())
-	//err = t.TestNoTX(context.TODO())
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Successfully connected and pinged.")
+	server.Start("localhost:8080")
 }

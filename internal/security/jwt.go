@@ -8,6 +8,10 @@ import (
 	"github.com/dgrijalva/jwt-go/v4"
 )
 
+type Tokens interface {
+	CreateAccessToken() (string, error)
+}
+
 var secretKey = []byte("p8cafxzquew4juy1rk9f")
 
 var token = jwt.New(jwt.SigningMethodHS256)
