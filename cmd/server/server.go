@@ -1,20 +1,23 @@
 package server
 
 import (
+	"project/iCredidentials/internal/mongodb"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	router *gin.Engine
+	router   *gin.Engine
+	database *mongodb.Database
 }
 
-func InitServer() *Server {
-	server := &Server{}
+func InitServer(db *mongodb.Database) *Server {
+	server := &Server{database: db}
 
 	route := gin.Default()
 	route.Use(cors.New(cors.Config{
-		AllowAllOrigins: true,
+		AllowAllOrigins: true, //To be changed
 		AllowMethods:    []string{"GET", "POST"},
 	}))
 
@@ -30,4 +33,9 @@ func (server *Server) Start(host string) error {
 
 func (server *Server) InitRoutes() {
 
+	api := server.router.Group("/api")
+	{
+		api.POST("/signin")
+		api.POST("/signup")
+	}
 }
