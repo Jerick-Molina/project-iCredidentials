@@ -5,9 +5,7 @@ import (
 )
 
 type Collections struct {
-	Users    *mongo.Collection
-	Settings *mongo.Collection
-	Keys     *mongo.Collection
+	Users *mongo.Collection
 }
 
 func New(db *mongo.Database) *Collections {

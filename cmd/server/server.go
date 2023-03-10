@@ -18,10 +18,12 @@ func InitServer(db *mongodb.Database) *Server {
 	route := gin.Default()
 	route.Use(cors.New(cors.Config{
 		AllowAllOrigins: true, //To be changed
+		AllowHeaders:    []string{"Authorization", "content-type"},
 		AllowMethods:    []string{"GET", "POST"},
 	}))
-
 	server.router = route
+
+	server.InitRoutes()
 
 	return server
 
@@ -35,7 +37,7 @@ func (server *Server) InitRoutes() {
 
 	api := server.router.Group("/api")
 	{
-		api.POST("/signin")
-		api.POST("/signup")
+		api.POST("/signin", server.SignIn)
+		api.POST("/signup", server.CreateAccount)
 	}
 }

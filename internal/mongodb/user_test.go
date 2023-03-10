@@ -21,7 +21,7 @@ func createRandomAccount(t *testing.T) AccountCreateAccountParams {
 		Password:  util.RandomChars(10),
 	}
 	fullName := fmt.Sprintf("%s%s", arg.FirstName, arg.LastName)
-	arg.Email = fmt.Sprintf("%s%d@testSubject.com", fullName, util.RandomNumber(200))
+	arg.Username = fmt.Sprintf("%s%d@", fullName, util.RandomNumber(200))
 	token, err := testCollections.CreateAccount(context.Background(), arg)
 
 	require.NoError(t, err)
@@ -37,17 +37,18 @@ func TestCreateAccount(t *testing.T) {
 
 func TestAccountSignIn(t *testing.T) {
 	acc := createRandomAccount(t)
-	results, err := testCollections.SignIn(context.Background(), acc.Email, acc.Password)
+
+	results, err := testCollections.SignIn(context.Background(), acc.Username, acc.Password)
 
 	require.NoError(t, err)
 	require.Equal(t, acc.FirstName, results.FirstName)
 	require.Equal(t, results.LastName, results.LastName)
-	require.Equal(t, acc.Email, results.Email)
+	require.Equal(t, acc.Username, results.Username)
 }
 
 func TestDuplicateEmailError(t *testing.T) {
 	acc := createRandomAccount(t)
-	err := testCollections.EmailDuplicateValidation(context.Background(), acc.Email)
+	err := testCollections.UsernameDuplicationValidater(context.Background(), acc.Username)
 	fmt.Println(err)
 	require.Error(t, err)
 }

@@ -33,6 +33,15 @@ func (config Config) ConfigURI() string {
 	return uri
 }
 
+func InitDatabase(client *mongo.Client, db *mongo.Database) *Database {
+
+	return &Database{
+		client:      client,
+		db:          db,
+		Collections: New(db),
+	}
+}
+
 func RunDatabase(conf Config) (*mongo.Client, error) {
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(conf.ConfigURI()))
@@ -45,15 +54,6 @@ func RunDatabase(conf Config) (*mongo.Client, error) {
 		panic(err)
 	}
 	return client, err
-}
-
-func InitDatabase(client *mongo.Client, db *mongo.Database) *Database {
-
-	return &Database{
-		client:      client,
-		db:          db,
-		Collections: New(db),
-	}
 }
 
 func (db *Database) execTx(ctx context.Context, fn func(sCtx mongo.SessionContext) (interface{}, error)) error {

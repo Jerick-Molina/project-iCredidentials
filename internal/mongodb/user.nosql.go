@@ -13,9 +13,8 @@ import (
 type AccountCreateAccountParams struct {
 	FirstName string `json:"First_Name" bson:"First_Name"`
 	LastName  string `json:"Last_Name" bson:"Last_Name"`
-	Email     string `json:"Email" bson:"Email"`
+	Username  string `json:"Username" bson:"Username"`
 	Password  string `json:"Password" bson:"Password"`
-	SettingId string `json:"Setting_Id" bson:"Setting_Id"`
 }
 
 func (coll *Collections) CreateAccount(ctx context.Context, acc AccountCreateAccountParams) (string, error) {
@@ -35,14 +34,13 @@ func (coll *Collections) CreateAccount(ctx context.Context, acc AccountCreateAcc
 
 type AccountSignInReturn struct {
 	UserId    string `bson:"_id"`
-	FirstName string `bson:"FirstName"`
-	LastName  string `bson:"LastName"`
-	Email     string `bson:"Email"`
-	SettingId string `bson:"Setting_Id"`
+	FirstName string `bson:"First_Name"`
+	LastName  string `bson:"Last_Name"`
+	Username  string `bson:"Username"`
 }
 
-func (coll *Collections) SignIn(ctx context.Context, email string, password string) (AccountSignInReturn, error) {
-	filter := bson.D{{"Email", email}, {"Password", util.HashPassword(password)}}
+func (coll *Collections) SignIn(ctx context.Context, username string, password string) (AccountSignInReturn, error) {
+	filter := bson.D{{"Username", username}, {"Password", util.HashPassword(password)}}
 	var acc AccountSignInReturn
 	results := coll.Users.FindOne(ctx, filter)
 	err := results.Decode(&acc)
@@ -53,8 +51,8 @@ func (coll *Collections) SignIn(ctx context.Context, email string, password stri
 	return acc, nil
 }
 
-func (coll *Collections) EmailDuplicateValidation(ctx context.Context, email string) error {
-	filter := bson.D{{"Email", email}}
+func (coll *Collections) UsernameDuplicationValidater(ctx context.Context, username string) error {
+	filter := bson.D{{"Username", username}}
 
 	results := coll.Users.FindOne(ctx, filter)
 
@@ -65,13 +63,13 @@ func (coll *Collections) EmailDuplicateValidation(ctx context.Context, email str
 		return results.Err()
 	}
 
-	return errors.New("Email Already Exist")
+	return errors.New("username already exist")
 }
 
 type AccountUserIdReturn struct {
 }
 
-func (coll *Collections) FindUser(ctx context.Context, userId string) (AccountUserIdReturn, error) {
+func (coll *Collections) SearchForUser(ctx context.Context, userId string) (AccountUserIdReturn, error) {
 	var acc AccountUserIdReturn
 	oid, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {

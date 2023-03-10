@@ -17,7 +17,7 @@ var testCollections *Collections
 func TestMain(m *testing.M) {
 	var params Config
 
-	data, err := ioutil.ReadFile("cmd/values.json")
+	data, err := ioutil.ReadFile("../../cmd/values.json")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -28,11 +28,11 @@ func TestMain(m *testing.M) {
 		fmt.Println(err)
 	}
 
-	_, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(params.ConfigURI()))
+	conn, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(params.ConfigURI()))
 
 	if err != nil {
 		panic(err)
 	}
-
+	testCollections = New(conn.Database(params.Database))
 	os.Exit(m.Run())
 }
