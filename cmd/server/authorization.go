@@ -17,7 +17,7 @@ func (server *Server) AuthorizeToken() gin.HandlerFunc {
 			ctx.Abort()
 		}
 
-		claims, err := security.TokenReader(token)
+		claims, err := security.ReadToken(token)
 
 		if err != nil {
 
@@ -27,8 +27,8 @@ func (server *Server) AuthorizeToken() gin.HandlerFunc {
 		}
 
 		//Sets users claims
-		ctx.Set("claims", claims)
 
+		ctx.Set("User_Id", claims.Audience[0])
 		ctx.Next()
 	}
 }

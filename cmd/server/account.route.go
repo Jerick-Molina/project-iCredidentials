@@ -9,15 +9,15 @@ import (
 )
 
 func (server *Server) CreateAccount(ctx *gin.Context) {
-	var acc mongodb.AccountCreateAccountParams
+	var params mongodb.CreateAccountParams
 	//Has special code or is using default ?
-	if err := ctx.BindJSON(&acc); err != nil {
+	if err := ctx.BindJSON(&params); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
-	fmt.Println(acc)
 
-	data, err := server.database.CreateAccountTx(ctx, acc)
+	params.WebsiteId = ctx.GetHeader("id")
+	data, err := server.database.CreateAccountTx(ctx, params)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -26,21 +26,18 @@ func (server *Server) CreateAccount(ctx *gin.Context) {
 
 }
 
-type SignInParams struct {
-	Username string `json:"Username" bson:"Username"`
-	Password string `json:"Password" bson:"Password"`
-}
-
 func (server *Server) SignIn(ctx *gin.Context) {
 
-	var params SignInParams
+	var params mongodb.SignInParams
 
 	if err := ctx.BindJSON(&params); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	results, err := server.database.SignInTx(ctx, params.Username, params.Password)
+	params.WebsiteId, _ = ctx.GetQuery("id")
+	fmt.Println(params.WebsiteId)
+	results, err := server.database.SignInTx(ctx, params)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err.Error())
 		return

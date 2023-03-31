@@ -13,8 +13,8 @@ var letters_test = "ABCDEFGHIJKLMNOQRZTUVWXYZ"
 var numbers_test = "1234567890"
 var special_test = "!?$&%#^"
 
-func createRandomAccount(t *testing.T) AccountCreateAccountParams {
-	arg := AccountCreateAccountParams{
+func createRandomAccount(t *testing.T) CreateAccountParams {
+	arg := CreateAccountParams{
 
 		FirstName: util.RandomName(),
 		LastName:  "testSubject",

@@ -38,6 +38,15 @@ func (server *Server) InitRoutes() {
 	api := server.router.Group("/api")
 	{
 		api.POST("/signin", server.SignIn)
+		
 		api.POST("/signup", server.CreateAccount)
+
+		auth := api.Group("/auth", server.AuthorizeToken())
+		{
+			website := auth.Group("/website")
+			{
+				website.POST("/register", server.RegisterWebsite)
+			}
+		}
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func HashPassword(passwd string) string {
+func Hasher(passwd string) string {
 
 	sum := sha256.Sum256([]byte(passwd))
 
