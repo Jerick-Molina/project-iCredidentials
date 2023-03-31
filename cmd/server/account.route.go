@@ -16,8 +16,8 @@ func (server *Server) CreateAccount(ctx *gin.Context) {
 		return
 	}
 
-	params.WebsiteId = ctx.GetHeader("id")
-	data, err := server.database.CreateAccountTx(ctx, params)
+	websiteId, _ := ctx.GetQuery("id")
+	data, err := server.database.CreateAccountTx(ctx, params, websiteId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -35,9 +35,9 @@ func (server *Server) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	params.WebsiteId, _ = ctx.GetQuery("id")
+	websiteId, _ := ctx.GetQuery("id")
 	fmt.Println(params.WebsiteId)
-	results, err := server.database.SignInTx(ctx, params)
+	results, err := server.database.SignInTx(ctx, params, websiteId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err.Error())
 		return

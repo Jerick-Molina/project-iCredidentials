@@ -18,22 +18,24 @@ type SignInParams struct {
 }
 
 // ======== Everything that ties with user =============
-func (db *Database) SignInTx(ctx context.Context, params SignInParams) (interface{}, error) {
+func (db *Database) SignInTx(ctx context.Context, params SignInParams, websiteId string) (interface{}, error) {
 
 	var token string
 	var acc AccountSignInReturn
-
+	var web WebsiteParams
 	var err error
 
 	err = db.execTx(ctx, func(sCtx mongo.SessionContext) (interface{}, error) {
 
 		acc, err = db.SignIn(ctx, params.Username, params.Password)
 		if err != nil {
+			fmt.Println("ELLOS")
 			return nil, err
 		}
 
-		web, err := db.UrlWebsiteValidation(ctx, params.WebsiteId)
+		web, err = db.UrlWebsiteValidation(ctx, websiteId)
 		if err != nil {
+
 			return nil, err
 		}
 		token, err = security.CreateToken(acc.UserId, web.Url, web.WebsiteSecret)
@@ -48,27 +50,35 @@ func (db *Database) SignInTx(ctx context.Context, params SignInParams) (interfac
 		return nil, err
 	}
 
-	x := []any{token, acc}
+	x := []any{token, acc, web.Url}
 
 	return x, nil
 }
 
-func (db *Database) CreateAccountTx(ctx context.Context, params CreateAccountParams) (string, error) {
+func (db *Database) CreateAccountTx(ctx context.Context, params CreateAccountParams, websiteId string) (interface{}, error) {
 	var token string
-
+	var acc AccountSignInReturn
+	var web WebsiteParams
 	err := db.execTx(ctx, func(sCtx mongo.SessionContext) (interface{}, error) {
 
 		err := db.UsernameDuplicationValidater(ctx, params.Username)
 		if err != nil {
+
 			return nil, err
 		}
 
 		user_id, err := db.CreateAccount(ctx, params)
 		if err != nil {
+
 			return nil, err
 		}
 
-		web, err := db.UrlWebsiteValidation(ctx, params.WebsiteId)
+		acc, err = db.SignIn(ctx, params.Username, params.Password)
+		if err != nil {
+
+			return nil, err
+		}
+		web, err = db.UrlWebsiteValidation(ctx, websiteId)
 		if err != nil {
 			return nil, err
 		}
@@ -82,12 +92,13 @@ func (db *Database) CreateAccountTx(ctx context.Context, params CreateAccountPar
 	if err != nil {
 		return "", err
 	}
+	x := []any{token, acc, web.Url}
 
-	return token, err
+	return x, err
 }
 
 // ======== Everything that ties with registing websites =============
-func (db *Database) RegisterWebsiteTx(ctx context.Context, params RegisterWebsiteParams) error {
+func (db *Database) RegisterWebsiteTx(ctx context.Context, params WebsiteParams) error {
 
 	var err error
 
@@ -104,7 +115,6 @@ func (db *Database) RegisterWebsiteTx(ctx context.Context, params RegisterWebsit
 			}
 			fmt.Println(err)
 		}
-		params.WebsiteSecretEncoded = util.Hasher(params.WebsiteSecret)
 
 		err = db.RegisterWebsite(ctx, params)
 

@@ -9,7 +9,7 @@ import (
 
 func (server *Server) RegisterWebsite(ctx *gin.Context) {
 
-	var params mongodb.RegisterWebsiteParams
+	var params mongodb.WebsiteParams
 
 	if err := ctx.BindJSON(&params); err != nil {
 		ctx.JSON(http.StatusInternalServerError, err.Error())

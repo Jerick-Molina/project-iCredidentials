@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"project/iCredidentials/util"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,7 +16,6 @@ type CreateAccountParams struct {
 	LastName  string `json:"Last_Name" bson:"Last_Name"`
 	Username  string `json:"Username" bson:"Username"`
 	Password  string `json:"Password" bson:"Password"`
-	WebsiteId string `json:"Website_Id" bson:"Website_Id"`
 }
 
 func (coll *Collections) CreateAccount(ctx context.Context, acc CreateAccountParams) (string, error) {
@@ -43,10 +43,14 @@ type AccountSignInReturn struct {
 // Sign user in if username and password match
 func (coll *Collections) SignIn(ctx context.Context, username string, password string) (AccountSignInReturn, error) {
 	filter := bson.D{{"Username", username}, {"Password", util.Hasher(password)}}
+	fmt.Println(username, password)
 	var acc AccountSignInReturn
 	results := coll.Users.FindOne(ctx, filter)
 	err := results.Decode(&acc)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return AccountSignInReturn{}, fmt.Errorf("InvalidCredidentials")
+		}
 		return AccountSignInReturn{}, err
 	}
 
@@ -60,7 +64,7 @@ func (coll *Collections) UsernameDuplicationValidater(ctx context.Context, usern
 	results := coll.Users.FindOne(ctx, filter)
 
 	if results.Err() != nil {
-		if results.Err() == mongo.ErrNilDocument {
+		if results.Err() == mongo.ErrNoDocuments {
 			return nil
 		}
 		return results.Err()

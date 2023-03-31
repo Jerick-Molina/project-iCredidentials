@@ -10,21 +10,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type RegisterWebsiteParams struct {
-	Owner                string `json:"User_id" bson:"User_id"`
-	Url                  string `bson:"Url"`
-	WebsiteSecret        string `bson:"Website_Secret_Key"`
-	WebsiteSecretEncoded string `bson:"Website_Secret_Encoded"`
-}
-
-type RegisteredWebsiteParams struct {
+type WebsiteParams struct {
 	Owner         string `json:"User_id" bson:"User_id"`
 	Url           string `bson:"Url"`
 	WebsiteSecret string `bson:"Website_Secret_Key"`
 }
 
 // User is able to register website
-func (coll *Collections) RegisterWebsite(ctx context.Context, params RegisterWebsiteParams) error {
+func (coll *Collections) RegisterWebsite(ctx context.Context, params WebsiteParams) error {
 
 	_, err := coll.Websites.InsertOne(ctx, params)
 	if err != nil {
@@ -83,9 +76,9 @@ func (coll *Collections) DeleteRegisteredWebsite(ctx context.Context, secret str
 }
 
 // If it has a redirect use that secret key if not use default.
-func (coll *Collections) UrlWebsiteValidation(ctx context.Context, websiteId string) (RegisteredWebsiteParams, error) {
+func (coll *Collections) UrlWebsiteValidation(ctx context.Context, websiteId string) (WebsiteParams, error) {
 
-	var rWeb RegisteredWebsiteParams
+	var rWeb WebsiteParams
 
 	if websiteId == "" {
 
